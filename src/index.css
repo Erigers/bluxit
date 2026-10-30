@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./hero-sky.css";
 
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
@@ -34,6 +35,8 @@
   --glass-border: #f0f0f0;
   --control: #f3f3f3;
   --shadow: 0 1px 0 #ffffff inset, 0 10px 28px rgba(26, 26, 26, 0.06);
+  --hero-sky: radial-gradient(ellipse at bottom, #0c2f5c 0%, #ffffff 78%);
+  --hero-sky-opacity: 0.38;
 }
 
 [data-theme="dark"] {
@@ -53,6 +56,8 @@
   --control: #262626;
   --shadow: 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent) inset,
     0 16px 36px rgba(0, 0, 0, 0.4);
+  --hero-sky: radial-gradient(ellipse at bottom, #2f6fd6 0%, #090a0f 100%);
+  --hero-sky-opacity: 0.42;
 }
 
 html,
@@ -126,6 +131,132 @@ textarea {
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.contact-note {
+  --paper: #f6f1e6;
+  --paper-line: color-mix(in srgb, #1a1a1a 10%, transparent);
+  position: relative;
+  display: grid;
+  padding: 1.75rem 1.4rem 1.4rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--brand) 12%, var(--paper)) 0 10px, var(--paper) 10px);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-radius: 0.2rem 0.2rem 1.35rem 1.35rem;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #ffffff 70%, transparent) inset,
+    0 18px 40px rgba(26, 26, 26, 0.1);
+  transform: rotate(-1.15deg);
+  transform-origin: top center;
+}
+
+.contact-note::before {
+  content: "";
+  position: absolute;
+  top: -0.55rem;
+  left: 50%;
+  width: 4.5rem;
+  height: 1.15rem;
+  translate: -50% 0;
+  background: color-mix(in srgb, var(--brand) 28%, white);
+  border-radius: 2px;
+  box-shadow: 0 1px 0 color-mix(in srgb, #ffffff 50%, transparent) inset;
+  opacity: 0.85;
+}
+
+.contact-stamp {
+  position: absolute;
+  top: 1.15rem;
+  right: 1.05rem;
+  rotate: 9deg;
+  border: 2px dashed color-mix(in srgb, var(--brand) 70%, var(--ink));
+  border-radius: 0.2rem;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--brand) 55%, var(--ink));
+}
+
+.contact-from,
+.contact-lines {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  font: inherit;
+}
+
+.contact-from {
+  padding: 0.15rem 0 0.35rem;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.contact-lines {
+  min-height: 9.5rem;
+  resize: vertical;
+  padding: 0.15rem 0 0.5rem;
+  line-height: 1.75rem;
+  background-image: repeating-linear-gradient(
+    transparent 0,
+    transparent calc(1.75rem - 1px),
+    var(--paper-line) calc(1.75rem - 1px),
+    var(--paper-line) 1.75rem
+  );
+  background-attachment: local;
+}
+
+.contact-from::placeholder,
+.contact-lines::placeholder {
+  color: color-mix(in srgb, var(--muted) 85%, transparent);
+}
+
+.contact-from:focus,
+.contact-lines:focus {
+  box-shadow: none;
+}
+
+.contact-note.sending {
+  animation: contact-send 0.52s ease-in forwards;
+}
+
+.contact-slips {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.contact-slip {
+  --tilt: -1deg;
+  padding: 0.95rem 1.05rem;
+  background: color-mix(in srgb, var(--surface) 88%, var(--brand-soft));
+  border: 1px solid var(--glass-border);
+  border-radius: 0.3rem 1rem 0.3rem 1rem;
+  box-shadow: var(--shadow);
+  transform: rotate(var(--tilt));
+}
+
+@keyframes contact-send {
+  to {
+    opacity: 0;
+    transform: translateY(-2.4rem) rotate(6deg) scale(0.94);
+  }
+}
+
+[data-theme="dark"] .contact-note {
+  --paper: #242018;
+  --paper-line: color-mix(in srgb, #f5f5f5 12%, transparent);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .contact-note::before {
+  background: color-mix(in srgb, var(--brand) 40%, #1a1a1a);
+}
+
+[data-theme="dark"] .contact-slip {
+  background: color-mix(in srgb, var(--surface) 88%, var(--brand-soft));
 }
 
 .field {
@@ -397,6 +528,223 @@ select.field {
   box-shadow: 0 0.2em #0f0f0f;
 }
 
+/* From Uiverse.io by Nawsome — scaled for the landing lifestyle section */
+.landing-signal {
+  --signal-scale: 2.8;
+  position: relative;
+  width: calc(75px * var(--signal-scale));
+  height: calc(100px * var(--signal-scale));
+  color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  .landing-signal {
+    --signal-scale: 4.6;
+  }
+}
+
+.landing-signal .loader {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 75px;
+  height: 100px;
+  transform: translateX(-50%) scale(var(--signal-scale));
+  transform-origin: center bottom;
+}
+
+.landing-signal .loader__bar {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 50%;
+  background: currentColor;
+  transform-origin: center bottom;
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--ink) 20%, transparent);
+}
+
+.landing-signal .loader__bar:nth-child(1) {
+  left: 0;
+  transform: scale(1, 0.2);
+  animation: landingBarUp1 4s infinite;
+}
+
+.landing-signal .loader__bar:nth-child(2) {
+  left: 15px;
+  transform: scale(1, 0.4);
+  animation: landingBarUp2 4s infinite;
+}
+
+.landing-signal .loader__bar:nth-child(3) {
+  left: 30px;
+  transform: scale(1, 0.6);
+  animation: landingBarUp3 4s infinite;
+}
+
+.landing-signal .loader__bar:nth-child(4) {
+  left: 45px;
+  transform: scale(1, 0.8);
+  animation: landingBarUp4 4s infinite;
+}
+
+.landing-signal .loader__bar:nth-child(5) {
+  left: 60px;
+  transform: scale(1, 1);
+  animation: landingBarUp5 4s infinite;
+}
+
+.landing-signal .loader__ball {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--brand);
+  border-radius: 50%;
+  animation: landingBall624 4s infinite;
+}
+
+@keyframes landingBall624 {
+  0% {
+    transform: translate(0, 0);
+  }
+  5% {
+    transform: translate(8px, -14px);
+  }
+  10% {
+    transform: translate(15px, -10px);
+  }
+  17% {
+    transform: translate(23px, -24px);
+  }
+  20% {
+    transform: translate(30px, -20px);
+  }
+  27% {
+    transform: translate(38px, -34px);
+  }
+  30% {
+    transform: translate(45px, -30px);
+  }
+  37% {
+    transform: translate(53px, -44px);
+  }
+  40% {
+    transform: translate(60px, -40px);
+  }
+  50% {
+    transform: translate(60px, 0);
+  }
+  57% {
+    transform: translate(53px, -14px);
+  }
+  60% {
+    transform: translate(45px, -10px);
+  }
+  67% {
+    transform: translate(37px, -24px);
+  }
+  70% {
+    transform: translate(30px, -20px);
+  }
+  77% {
+    transform: translate(22px, -34px);
+  }
+  80% {
+    transform: translate(15px, -30px);
+  }
+  87% {
+    transform: translate(7px, -44px);
+  }
+  90% {
+    transform: translate(0, -40px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes landingBarUp1 {
+  0% {
+    transform: scale(1, 0.2);
+  }
+  40% {
+    transform: scale(1, 0.2);
+  }
+  50% {
+    transform: scale(1, 1);
+  }
+  90% {
+    transform: scale(1, 1);
+  }
+  100% {
+    transform: scale(1, 0.2);
+  }
+}
+
+@keyframes landingBarUp2 {
+  0% {
+    transform: scale(1, 0.4);
+  }
+  40% {
+    transform: scale(1, 0.4);
+  }
+  50% {
+    transform: scale(1, 0.8);
+  }
+  90% {
+    transform: scale(1, 0.8);
+  }
+  100% {
+    transform: scale(1, 0.4);
+  }
+}
+
+@keyframes landingBarUp3 {
+  0% {
+    transform: scale(1, 0.6);
+  }
+  100% {
+    transform: scale(1, 0.6);
+  }
+}
+
+@keyframes landingBarUp4 {
+  0% {
+    transform: scale(1, 0.8);
+  }
+  40% {
+    transform: scale(1, 0.8);
+  }
+  50% {
+    transform: scale(1, 0.4);
+  }
+  90% {
+    transform: scale(1, 0.4);
+  }
+  100% {
+    transform: scale(1, 0.8);
+  }
+}
+
+@keyframes landingBarUp5 {
+  0% {
+    transform: scale(1, 1);
+  }
+  40% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1, 0.2);
+  }
+  90% {
+    transform: scale(1, 0.2);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   a,
   button,
@@ -408,6 +756,15 @@ select.field {
   .btn-primary::before,
   .btn-primary::after {
     transition: none;
+  }
+
+  .landing-signal .loader__bar,
+  .landing-signal .loader__ball,
+  .hero-stars,
+  .hero-stars-2,
+  .hero-stars-3,
+  .contact-note.sending {
+    animation: none;
   }
 }
 

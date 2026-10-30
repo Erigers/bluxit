@@ -2,6 +2,8 @@
 
 A free personal finance tracker. No payments, no subscriptions. Templates hold accounts, accounts hold your money, and expenses deduct from the account you choose.
 
+![bluxit first paint](docs/first-paint.png)
+
 ## Run locally
 
 ```bash

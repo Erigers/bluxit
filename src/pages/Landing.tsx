@@ -2,21 +2,19 @@ import {
   ArrowRight,
   Cloud,
   Layers,
-  MessageSquare,
   Send,
   Share2,
   Smartphone,
   Sparkles,
-  User,
   Wallet,
   X,
 } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { flushCloudEvents, listCloudTemplates, trackCloudEvent } from '../cloud'
 import { Logo } from '../components/Logo'
 import { ThemeToggle } from '../components/ThemeToggle'
-import { Button, ColorDot, Field } from '../components/ui'
+import { Button, ColorDot } from '../components/ui'
 import { applyTheme, cn, uid } from '../lib'
 import { usePrefersDark, useStore } from '../store'
 import type { CloudTemplate } from '../types'
@@ -124,6 +122,7 @@ export function Landing() {
   const [message, setMessage] = useState('')
   const [notes, setNotes] = useState<Note[]>(loadNotes)
   const [toastKey, setToastKey] = useState(0)
+  const [sending, setSending] = useState(false)
   const [shared, setShared] = useState<CloudTemplate[]>(FALLBACK_SHARED)
   const [hash, setHash] = useState(() => window.location.hash)
 
@@ -200,29 +199,36 @@ export function Landing() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-5xl gap-10 px-4 py-14 md:grid-cols-2 md:items-center md:py-20">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand">Free money tracker</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-              No more sign up, just begin.
-            </h1>
-            <p className="mt-4 text-lg text-muted">
-              Everything lives on your device. The one thing you can put on our servers is a template —
-              never the money.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Cta to={begin} className="px-6 text-base" onClick={user ? undefined : onBegin}>
-                {user ? <Wallet size={18} /> : <Sparkles size={18} />}
-                {user ? 'Open your wallet' : 'Just begin'}
-                <ArrowRight size={16} />
-              </Cta>
-            </div>
+        <section className="relative overflow-hidden">
+          <div className="hero-sky" aria-hidden="true">
+            <div className="hero-stars" />
+            <div className="hero-stars-2" />
+            <div className="hero-stars-3" />
           </div>
-          <HeroCard />
+          <div className="relative mx-auto grid max-w-5xl gap-10 px-4 py-24 md:grid-cols-2 md:items-center md:py-40">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">Free money tracker</p>
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+                No more sign up, just begin.
+              </h1>
+              <p className="mt-4 text-lg text-muted">
+                Everything lives on your device. The one thing you can put on our servers is a template —
+                never the money.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Cta to={begin} className="px-6 text-base" onClick={user ? undefined : onBegin}>
+                  {user ? <Wallet size={18} /> : <Sparkles size={18} />}
+                  {user ? 'Open your wallet' : 'Just begin'}
+                  <ArrowRight size={16} />
+                </Cta>
+              </div>
+            </div>
+            <HeroCard />
+          </div>
         </section>
 
         <section className="border-y border-line/60 bg-surface/35">
-          <div className="mx-auto grid max-w-5xl gap-6 px-4 py-14 md:grid-cols-2">
+          <div className="mx-auto grid max-w-5xl gap-6 px-4 py-14 md:grid-cols-2 md:py-32">
             <article className="card p-6">
               <Smartphone className="text-brand" size={28} />
               <h2 className="mt-4 text-2xl font-semibold">Everything on your device.</h2>
@@ -276,7 +282,7 @@ export function Landing() {
         </section>
 
         <section id="lifestyle" className="border-y border-line/60 bg-surface/35">
-          <div className="mx-auto grid max-w-5xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center">
+          <div className="mx-auto grid max-w-5xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-32">
             <div>
               <Wallet className="text-brand" size={28} />
               <h2 className="mt-4 text-3xl font-semibold tracking-tight">
@@ -295,96 +301,132 @@ export function Landing() {
                 {user ? 'Browse the catalog' : 'Start from a blank template'}
               </Cta>
             </div>
-            {shared.length === 0 ? (
-              <p className="card p-4 text-sm text-muted">
-                No templates uploaded on the cloud yet. Share a template from the app to list it here.
-              </p>
-            ) : (
-              <ul className="grid gap-3">
-                {shared.map((s) => (
-                  <li key={s.id} className="card flex items-center justify-between gap-3 p-4">
-                    <span className="flex items-center gap-3">
-                      <ColorDot color={s.accounts[0]?.color ?? '#4eb8ea'} size={14} />
-                      <span>
-                        <span className="block font-semibold">{s.name}</span>
-                        <span className="text-sm text-muted">
-                          {s.authorUsername ? `Shared by ${s.authorUsername}` : 'Name only'}
+            <div className="grid justify-items-center gap-6">
+              <SignalLoader />
+              {shared.length === 0 ? (
+                <p className="card w-full p-4 text-sm text-muted">
+                  No templates uploaded on the cloud yet. Share a template from the app to list it here.
+                </p>
+              ) : (
+                <ul className="grid w-full gap-3">
+                  {shared.map((s) => (
+                    <li key={s.id} className="card flex items-center justify-between gap-3 p-4">
+                      <span className="flex items-center gap-3">
+                        <ColorDot color={s.accounts[0]?.color ?? '#4eb8ea'} size={14} />
+                        <span>
+                          <span className="block font-semibold">{s.name}</span>
+                          <span className="text-sm text-muted">
+                            {s.authorUsername ? `Shared by ${s.authorUsername}` : 'Name only'}
+                          </span>
                         </span>
                       </span>
-                    </span>
-                    <Share2 size={16} className="text-muted" />
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <Share2 size={16} className="text-muted" />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </section>
 
-        <section id="contact" className="mx-auto max-w-lg scroll-mt-20 px-4 py-16">
-          <h2 className="text-2xl font-semibold">No reason to reach out, but here you can.</h2>
-          <p className="mt-2 text-sm text-muted">
-            No ticket system. The note stays on this device for now.
-          </p>
-          <form
-            className="card mt-6 grid gap-3 p-5"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const text = message.trim()
-              if (!text) return
-              const note: Note = {
-                id: uid(),
-                name: name.trim() || 'Anonymous',
-                message: text,
-                at: new Date().toISOString(),
-                read: false,
-              }
-              const next = [note, ...notes]
-              setNotes(next)
-              saveNotes(next)
-              setMessage('')
-              setToastKey(Date.now())
-            }}
-          >
-            <Field label="Name" icon={<User size={16} />}>
-              <input
-                className="field"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="If you want"
-              />
-            </Field>
-            <Field label="A few words" icon={<MessageSquare size={16} />}>
-              <textarea
-                className="field min-h-28 resize-y"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                required
-              />
-            </Field>
-            <Button type="submit">
-              <Send size={16} />
-              Send anyway
-            </Button>
-          </form>
-          {notes.length ? (
-            <div className="card mt-6 px-5 py-4">
-              <ul className="list-disc space-y-2 pl-5 text-sm">
-                {notes.map((note) => (
-                  <li key={note.id} className="text-ink">
-                    <span
-                      className={cn(
-                        'mr-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
-                        note.read ? 'bg-ok/15 text-ok' : 'bg-brand-soft text-brand',
-                      )}
-                    >
-                      {note.read ? 'Read' : 'Unread'}
-                    </span>
-                    {previewMessage(note.message)}
-                  </li>
-                ))}
-              </ul>
+        <section id="contact" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-16 pb-24 md:py-24 md:pb-32">
+          <div className="grid items-start gap-10 md:grid-cols-2">
+            <div className="max-w-md">
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">Not a mailbox</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                No reason to reach out, but here you can.
+              </h2>
+              <p className="mt-3 text-muted">
+                There is no ticket queue. Write a note, send it anyway, and it stays in this browser —
+                like a scrap of paper in a drawer.
+              </p>
             </div>
-          ) : null}
+            <div>
+              <form
+                className={cn('contact-note', sending && 'sending')}
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const text = message.trim()
+                  if (!text || sending) return
+                  const note: Note = {
+                    id: uid(),
+                    name: name.trim() || 'Anonymous',
+                    message: text,
+                    at: new Date().toISOString(),
+                    read: false,
+                  }
+                  setSending(true)
+                  window.setTimeout(() => {
+                    const next = [note, ...loadNotes()]
+                    setNotes(next)
+                    saveNotes(next)
+                    setName('')
+                    setMessage('')
+                    setSending(false)
+                    setToastKey(Date.now())
+                  }, 520)
+                }}
+              >
+                <span className="contact-stamp">Local only</span>
+                <label className="grid gap-1 text-sm">
+                  <span className="font-medium text-ink">From</span>
+                  <input
+                    className="contact-from"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Anonymous is fine"
+                    autoComplete="nickname"
+                  />
+                </label>
+                <label className="mt-5 grid gap-1 text-sm">
+                  <span className="font-medium text-ink">The thing you were going to say</span>
+                  <textarea
+                    className="contact-lines"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Write it like a note on the fridge."
+                    required
+                  />
+                </label>
+                <p className="mt-2 text-xs text-muted">
+                  {message.trim()
+                    ? `${message.trim().length} characters of pretending`
+                    : 'Still empty. That is also a message.'}
+                </p>
+                <Button type="submit" className="mt-5" disabled={sending}>
+                  <Send size={16} />
+                  {sending ? 'Tucking it away' : 'Send anyway'}
+                </Button>
+              </form>
+              {notes.length ? (
+                <ul className="contact-slips mt-8">
+                  {notes.map((note, i) => (
+                    <li key={note.id} className="contact-slip" style={{ '--tilt': `${i % 2 ? 1.2 : -1.1}deg` } as CSSProperties}>
+                      <span
+                        className={cn(
+                          'rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+                          note.read ? 'bg-ok/15 text-ok' : 'bg-brand-soft text-brand',
+                        )}
+                      >
+                        {note.read ? 'Read' : 'In the drawer'}
+                      </span>
+                      <p className="mt-2 text-sm text-ink">{previewMessage(note.message)}</p>
+                      <p className="mt-1 text-xs text-muted">
+                        {note.name}
+                        {' · '}
+                        {new Date(note.at).toLocaleString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </div>
         </section>
         {toastKey ? (
           <div
@@ -428,10 +470,61 @@ export function Landing() {
             </a>
           </div>
         </div>
-        <p className="border-t border-line px-4 py-4 text-center text-xs text-muted">
-          © {new Date().getFullYear()} bluxit
-        </p>
+        <div className="border-t border-line px-4 py-4">
+          <div className="mx-auto flex max-w-5xl flex-col gap-3 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
+            <p>all rights not reserved © {new Date().getFullYear()} bluxit</p>
+            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+              <span>visit link:</span>
+              <a
+                href="https://bluxit.vercel.app"
+                className="text-brand hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                https://bluxit.vercel.app
+              </a>
+              <span>or run it on your machine:</span>
+              <a
+                href="https://github.com/Erigers/bluxit"
+                className="inline-flex items-center gap-1 font-medium text-ink hover:text-brand"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <GithubMark className="h-3.5 w-3.5" />
+                Github
+              </a>
+            </p>
+          </div>
+        </div>
       </footer>
+    </div>
+  )
+}
+
+function GithubMark({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.523 2 12 2z" />
+    </svg>
+  )
+}
+
+function SignalLoader() {
+  return (
+    <div className="landing-signal" aria-hidden="true">
+      <div className="loader">
+        <div className="loader__bar" />
+        <div className="loader__bar" />
+        <div className="loader__bar" />
+        <div className="loader__bar" />
+        <div className="loader__bar" />
+        <div className="loader__ball" />
+      </div>
     </div>
   )
 }
