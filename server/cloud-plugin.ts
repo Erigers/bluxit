@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Connect, Plugin } from 'vite'
+import { resolveDesktopDownload } from './desktop.ts'
 import { getRatingStats, saveRating } from './ratings.ts'
 
 type CloudType = { name: string; color: string }
@@ -153,6 +154,14 @@ const handler: Connect.NextHandleFunction = (req, res, next) => {
   void (async () => {
     const method = (req.method ?? 'GET').toUpperCase()
     const rest = pathname.slice('/api/cloud'.length)
+
+    if (method === 'GET' && rest === '/desktop') {
+      const href = await resolveDesktopDownload(String(req.headers['user-agent'] ?? ''))
+      res.statusCode = 302
+      res.setHeader('Location', href)
+      res.end()
+      return
+    }
 
     if (method === 'GET' && rest === '/ratings') {
       send(res, 200, await getRatingStats())
