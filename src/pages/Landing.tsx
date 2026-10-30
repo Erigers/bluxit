@@ -14,8 +14,9 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchRatings, flushCloudEvents, listCloudTemplates, trackCloudEvent, type RatingStats } from '../cloud'
 import { DesktopDownload } from '../components/DesktopDownload'
-import { RatingStars } from '../components/RateApp'
 import { Logo } from '../components/Logo'
+import { RatingTill } from '../components/RatingTill'
+import { WalletFileCard } from '../components/WalletFileCard'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { Button, ColorDot } from '../components/ui'
 import { applyTheme, cn, uid } from '../lib'
@@ -162,7 +163,7 @@ export function Landing() {
 
   return (
     <div className="min-h-dvh bg-bg text-ink">
-      <header className="top-banner-offset sticky top-0 z-30 border-b border-transparent bg-[var(--glass)] backdrop-blur-xl">
+      <header className="top-banner-offset sticky top-0 z-30 border-b border-transparent bg-[color-mix(in_srgb,var(--surface)_22%,transparent)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/" aria-label="bluxit home">
             <Logo className="text-base md:text-2xl" markClassName="h-7 w-7 md:h-10 md:w-10" />
@@ -170,9 +171,9 @@ export function Landing() {
           <nav className="hidden items-center gap-5 text-sm font-medium md:flex">
             {(
               [
-                ['#templates', 'Wallet Templates'],
                 ['#lifestyle', 'Lifestyle'],
                 ['#desktop', 'Desktop'],
+                ['#templates', 'Wallet Templates'],
                 ['#contact', 'Contact'],
               ] as const
             ).map(([href, label]) => (
@@ -206,7 +207,7 @@ export function Landing() {
       </header>
 
       <main>
-        <section className="relative overflow-hidden">
+        <section className="relative">
           <div className="hero-sky" aria-hidden="true">
             <div className="hero-stars" />
             <div className="hero-stars-2" />
@@ -233,135 +234,6 @@ export function Landing() {
             </div>
             <HeroCard />
           </div>
-        </section>
-
-        <section>
-          <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 sm:grid-cols-[auto_1fr] sm:items-center md:py-16">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-brand">From people using it</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">How bluxit is rated</h2>
-              <p className="mt-2 text-muted">
-                Everyone who taps stars on Home adds to this average. Wallets stay on-device; the score
-                is the one public tally.
-              </p>
-            </div>
-            <div className="card p-5 sm:justify-self-end">
-              {ratings && ratings.count > 0 ? (
-                <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
-                  <div>
-                    <p className="num text-4xl font-semibold leading-none">{ratings.average.toFixed(1)}</p>
-                    <RatingStars value={ratings.average} size={20} />
-                    <p className="mt-1 text-sm text-muted">
-                      {ratings.count} {ratings.count === 1 ? 'rating' : 'ratings'}
-                    </p>
-                  </div>
-                  <ul className="grid min-w-[9.5rem] gap-1 text-xs text-muted">
-                    {[5, 4, 3, 2, 1].map((star) => {
-                      const n = ratings.histogram[star - 1]
-                      const pct = ratings.count ? Math.round((n / ratings.count) * 100) : 0
-                      return (
-                        <li key={star} className="flex items-center gap-2">
-                          <span className="w-3 tabular-nums">{star}</span>
-                          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--control)]">
-                            <span
-                              className="block h-full rounded-full bg-brand"
-                              style={{ width: `${pct}%` }}
-                            />
-                          </span>
-                          <span className="w-6 text-right tabular-nums">{n}</span>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              ) : (
-                <p className="text-sm text-muted">
-                  No ratings yet. Open the app and tap stars on Home — the collection shows up here.
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section id="desktop" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-16 md:py-24">
-          <div className="grid items-center gap-10 md:grid-cols-2">
-            <div>
-              <Monitor className="text-brand" size={28} />
-              <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-brand">Desktop app</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                Run bluxit on your computer.
-              </h2>
-              <p className="mt-3 text-muted">
-                Same wallet, as a window. On first launch you pick the file. Change that path later in
-                Settings. Windows, macOS, and Linux.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <DesktopDownload variant="primary" />
-              </div>
-            </div>
-            <article className="card p-6">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Your file</p>
-              <p className="mt-3 font-mono text-sm text-ink">Documents/bluxit/bluxit.json</p>
-              <p className="mt-2 text-sm text-muted">
-                Income, accounts, and spending stay in that JSON — not in a browser profile, not on our
-                servers.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section className="border-y border-line/60 bg-surface/35">
-          <div className="mx-auto grid max-w-5xl gap-6 px-4 py-14 md:grid-cols-2 md:py-32">
-            <article className="card p-6">
-              <Smartphone className="text-brand" size={28} />
-              <h2 className="mt-4 text-2xl font-semibold">Everything on your device.</h2>
-              <p className="mt-2 text-muted">
-                Templates, accounts, income, expenses, and your PIN stay in this browser. No account
-                vendor. No subscription. You start, and the wallet is already yours.
-              </p>
-            </article>
-            <article className="card p-6">
-              <Cloud className="text-brand" size={28} />
-              <h2 className="mt-4 text-2xl font-semibold">You decide what you want on cloud.</h2>
-              <p className="mt-2 text-muted">
-                Share a template name, the accounts inside it, and expense types with their colors.
-                Income, balances, and spending stay here. Credit it with your username, or share
-                anonymously — then only the template name is listed.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section id="templates" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-16">
-          <div className="max-w-xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand">Customized templates</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-              Manage your wallet how is best for you.
-            </h2>
-            <p className="mt-3 text-muted">
-              A template is a set of accounts with colors, currencies, and splits. Build one for
-              weekdays, another for a trip. Switch when life switches.
-            </p>
-          </div>
-          <ul className="mt-8 grid gap-4 sm:grid-cols-3">
-            {TEMPLATES.map((t) => (
-              <li key={t.name} className="card p-5">
-                <p className="flex items-center gap-2 font-semibold">
-                  <Layers size={16} className="text-brand" />
-                  {t.name}
-                </p>
-                <p className="mt-1 text-sm text-muted">{t.note}</p>
-                <ul className="mt-4 grid gap-2">
-                  {t.accounts.map((a) => (
-                    <li key={a.name} className="flex items-center gap-2 text-sm">
-                      <ColorDot color={a.color} />
-                      {a.name}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
         </section>
 
         <section id="lifestyle" className="border-y border-line/60 bg-surface/35">
@@ -409,6 +281,94 @@ export function Landing() {
                 </ul>
               )}
             </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="mx-auto grid max-w-5xl gap-6 px-4 py-14 md:grid-cols-2 md:py-32">
+            <article className="card p-6">
+              <Smartphone className="text-brand" size={28} />
+              <h2 className="mt-4 text-2xl font-semibold">Everything on your device.</h2>
+              <p className="mt-2 text-muted">
+                Templates, accounts, income, expenses, and your PIN stay in this browser. No account
+                vendor. No subscription. You start, and the wallet is already yours.
+              </p>
+            </article>
+            <article className="card p-6">
+              <Cloud className="text-brand" size={28} />
+              <h2 className="mt-4 text-2xl font-semibold">You decide what you want on cloud.</h2>
+              <p className="mt-2 text-muted">
+                Share a template name, the accounts inside it, and expense types with their colors.
+                Income, balances, and spending stay here. Credit it with your username, or share
+                anonymously — then only the template name is listed.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="desktop" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-16 md:py-24">
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <Monitor className="text-brand" size={28} />
+              <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-brand">Desktop app</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight">Hold it like a card.</h2>
+              <p className="mt-3 text-muted">
+                Same wallet, as a window. Tilt it. Flip it. On first launch you pick the file, then
+                change the path in Settings. Windows, macOS, and Linux.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <DesktopDownload variant="primary" />
+              </div>
+            </div>
+            <WalletFileCard />
+          </div>
+        </section>
+
+        <section>
+          <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] sm:items-center md:py-20">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">From the floor</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight">The till keeps the score.</h2>
+              <p className="mt-2 text-muted">
+                Stars from Home roll into this odometer. Wallets stay private — this is the one number
+                we keep in public.
+              </p>
+            </div>
+            <RatingTill ratings={ratings} />
+          </div>
+        </section>
+
+        <section id="templates" className="border-y border-line/60 bg-surface/35">
+          <div className="mx-auto max-w-5xl scroll-mt-20 px-4 py-16">
+            <div className="max-w-xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-brand">Customized templates</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                Manage your wallet how is best for you.
+              </h2>
+              <p className="mt-3 text-muted">
+                A template is a set of accounts with colors, currencies, and splits. Build one for
+                weekdays, another for a trip. Switch when life switches.
+              </p>
+            </div>
+            <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+              {TEMPLATES.map((t) => (
+                <li key={t.name} className="card p-5">
+                  <p className="flex items-center gap-2 font-semibold">
+                    <Layers size={16} className="text-brand" />
+                    {t.name}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">{t.note}</p>
+                  <ul className="mt-4 grid gap-2">
+                    {t.accounts.map((a) => (
+                      <li key={a.name} className="flex items-center gap-2 text-sm">
+                        <ColorDot color={a.color} />
+                        {a.name}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

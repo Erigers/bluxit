@@ -1,11 +1,20 @@
 /* From Uiverse.io by sinful_9361 — starfield behind the landing hero */
 .hero-sky {
   position: absolute;
-  inset: 0;
+  top: calc(-1 * (4.75rem + env(safe-area-inset-top, 0px)));
+  right: 0;
+  bottom: 0;
+  left: 0;
   overflow: hidden;
   pointer-events: none;
   opacity: var(--hero-sky-opacity);
   background: var(--hero-sky);
+}
+
+[data-theme="light"] .hero-stars,
+[data-theme="light"] .hero-stars-2,
+[data-theme="light"] .hero-stars-3 {
+  opacity: 0.22;
 }
 
 .hero-stars {

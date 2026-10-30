@@ -35,8 +35,11 @@
   --glass-border: #f0f0f0;
   --control: #f3f3f3;
   --shadow: 0 1px 0 #ffffff inset, 0 10px 28px rgba(26, 26, 26, 0.06);
-  --hero-sky: radial-gradient(ellipse at bottom, #0c2f5c 0%, #ffffff 78%);
-  --hero-sky-opacity: 0.38;
+  --hero-sky:
+    radial-gradient(ellipse 90% 70% at 78% -8%, color-mix(in srgb, var(--brand-2) 90%, white) 0%, transparent 58%),
+    radial-gradient(ellipse 80% 45% at 50% 0%, color-mix(in srgb, var(--brand) 48%, white) 0%, transparent 62%),
+    linear-gradient(180deg, #9ed4ee 0%, #c5eaf8 28%, #e7f6fc 58%, transparent 86%);
+  --hero-sky-opacity: 1;
 }
 
 [data-theme="dark"] {
@@ -56,8 +59,9 @@
   --control: #262626;
   --shadow: 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent) inset,
     0 16px 36px rgba(0, 0, 0, 0.4);
-  --hero-sky: radial-gradient(ellipse at bottom, #2f6fd6 0%, #090a0f 100%);
-  --hero-sky-opacity: 0.42;
+  --hero-sky:
+    radial-gradient(ellipse 100% 80% at 50% -12%, #2a6cb8 0%, #123258 42%, #090a0f 78%);
+  --hero-sky-opacity: 0.72;
 }
 
 html,
@@ -131,6 +135,55 @@ textarea {
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.rating-till {
+  position: relative;
+  overflow: hidden;
+  padding: 1.35rem 1.4rem 1.2rem;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface) 92%, var(--brand-soft)) 0 28px,
+      color-mix(in srgb, var(--surface) 88%, var(--brand)) 28px 29px
+    );
+  border: 1px dashed color-mix(in srgb, var(--ink) 16%, transparent);
+  border-radius: 0.35rem 0.35rem 1.15rem 1.15rem;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #ffffff 55%, transparent) inset,
+    0 16px 36px rgba(26, 26, 26, 0.08);
+}
+
+.rating-till-perforation {
+  margin: 0.85rem -0.2rem 0;
+  height: 10px;
+  background: radial-gradient(circle at 8px 5px, var(--bg) 4px, transparent 4.5px) 0 0 / 16px 10px repeat-x;
+}
+
+.wallet-plastic {
+  background:
+    radial-gradient(90% 70% at 110% -10%, color-mix(in srgb, var(--brand) 70%, white), transparent 58%),
+    linear-gradient(145deg, #041820 0%, #0c4b68 42%, #083044 100%);
+}
+
+.tilted-card__front {
+  background:
+    radial-gradient(90% 70% at 110% -10%, color-mix(in srgb, var(--brand) 70%, white), transparent 58%),
+    linear-gradient(145deg, #041820 0%, #0c4b68 42%, #083044 100%);
+}
+
+.tilted-card__front .wallet-plastic {
+  mix-blend-mode: normal;
+}
+
+.tilted-card__front > .mix-blend-screen,
+.tilted-card__back > .mix-blend-screen {
+  mix-blend-mode: overlay;
+}
+
+.wallet-plastic-back {
+  background:
+    linear-gradient(165deg, #0a2a3e 0%, #16475f 55%, #0b3a55 100%);
 }
 
 .contact-note {
