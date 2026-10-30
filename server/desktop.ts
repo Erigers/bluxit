@@ -1,5 +1,5 @@
 export const GITHUB_REPO = 'Erigers/bluxit'
-export const DESKTOP_VERSION = '0.1.0'
+export const DESKTOP_VERSION = '0.1.1'
 export const RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases/latest`
 
 export type GuestOs = 'windows' | 'macos' | 'linux' | 'other'
