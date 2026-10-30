@@ -26,3 +26,5 @@ data/cloud-events.json
 *.njsproj
 *.sln
 *.sw?
+
+.env*
