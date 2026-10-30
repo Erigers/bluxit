@@ -1,6 +1,7 @@
 import { Download, FolderOpen, HardDrive, KeyRound, LogOut, Trash2, Upload, User } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { DesktopUpdateCard } from '../components/DesktopUpdate'
 import { InstallApp } from '../components/InstallApp'
 import { PinInput } from '../components/PinInput'
 import { ThemeToggle } from '../components/ThemeToggle'
@@ -42,7 +43,12 @@ export function Settings() {
         }
       />
 
-      {isDesktop() ? <WalletFileCard /> : (
+      {isDesktop() ? (
+        <>
+          <WalletFileCard />
+          <DesktopUpdateCard />
+        </>
+      ) : (
         <section className="card mb-4 grid gap-3 p-4">
           <h2 className="font-semibold">Install app</h2>
           <InstallApp />
