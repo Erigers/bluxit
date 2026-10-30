@@ -25,6 +25,11 @@
       "permanent": false
     }
   ],
+  "functions": {
+    "api/cloud/**/*.ts": {
+      "includeFiles": "api/lib/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/((?!api/).*)",

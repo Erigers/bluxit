@@ -1,4 +1,4 @@
-import { getRatingStats, saveRating } from '../../server/ratings'
+import { getRatingStats, saveRating } from '../lib/ratings'
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {

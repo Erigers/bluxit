@@ -14,6 +14,8 @@ export function DesktopDownload({
   return (
     <a
       href={desktopDownloadHref()}
+      target="_blank"
+      rel="noopener noreferrer"
       className={cn('btn shrink-0', variant === 'primary' ? 'btn-primary' : 'btn-soft', className)}
     >
       <span className="btn-label">
