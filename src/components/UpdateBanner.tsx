@@ -1,48 +1,52 @@
 import { RefreshCw } from 'lucide-react'
-import { useEffect } from 'react'
-import { useRegisterSW } from 'virtual:pwa-register/react'
-import { Button } from './ui'
-
-const CHECK_MS = 15 * 60 * 1000
+import { useEffect, useRef, useState } from 'react'
+import { isAppleHandheld, subscribeAppleUpdate } from '../pwa'
 
 export function UpdateBanner() {
-  const {
-    needRefresh: [needRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    immediate: true,
-    onRegisteredSW(_url, registration) {
-      if (!registration) return
-      const check = () => {
-        void registration.update()
-      }
-      window.setInterval(check, CHECK_MS)
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') check()
-      })
-    },
-  })
+  const [ready, setReady] = useState(false)
+  const barRef = useRef<HTMLDivElement>(null)
+  const apple = isAppleHandheld()
 
   useEffect(() => {
-    document.documentElement.classList.toggle('has-app-update', needRefresh)
-    return () => document.documentElement.classList.remove('has-app-update')
-  }, [needRefresh])
+    if (!apple) return
+    return subscribeAppleUpdate(setReady)
+  }, [apple])
 
-  if (!needRefresh) return null
+  useEffect(() => {
+    const el = barRef.current
+    if (!ready || !apple || !el) {
+      document.documentElement.classList.remove('has-app-update')
+      document.documentElement.style.removeProperty('--update-banner-h')
+      return
+    }
+
+    const apply = () => {
+      document.documentElement.style.setProperty('--update-banner-h', `${el.offsetHeight}px`)
+      document.documentElement.classList.add('has-app-update')
+    }
+    apply()
+    const observer = new ResizeObserver(apply)
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      document.documentElement.classList.remove('has-app-update')
+      document.documentElement.style.removeProperty('--update-banner-h')
+    }
+  }, [apple, ready])
+
+  if (!apple || !ready) return null
 
   return (
-    <div className="fixed inset-x-0 top-0 z-[90] border-b border-brand/25 bg-brand-soft pt-[env(safe-area-inset-top)] text-ink">
-      <div className="mx-auto flex min-h-11 max-w-5xl items-center gap-3 px-4 py-2">
-        <RefreshCw size={16} className="shrink-0 text-brand" aria-hidden />
-        <p className="min-w-0 flex-1 text-sm font-medium">A newer bluxit is ready on this device.</p>
-        <Button
-          className="shrink-0"
-          onClick={() => {
-            void updateServiceWorker(true)
-          }}
-        >
-          Update
-        </Button>
+    <div
+      ref={barRef}
+      className="fixed inset-x-0 top-0 z-[90] border-b border-brand/25 bg-brand-soft pt-[env(safe-area-inset-top)] text-ink"
+      role="status"
+    >
+      <div className="mx-auto flex min-h-11 max-w-5xl items-start gap-3 px-4 py-2">
+        <RefreshCw size={16} className="mt-0.5 shrink-0 text-brand" aria-hidden />
+        <p className="min-w-0 flex-1 text-sm font-medium leading-snug">
+          A new version is ready. Close the app and open it again to view the update.
+        </p>
       </div>
     </div>
   )

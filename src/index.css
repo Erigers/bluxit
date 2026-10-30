@@ -795,16 +795,12 @@ html.app-locked #root {
   overscroll-behavior-y: contain;
 }
 
-html.has-app-update {
-  --update-banner-h: calc(2.75rem + env(safe-area-inset-top, 0px));
-}
-
 html.has-app-update .app-shell {
-  top: var(--update-banner-h);
+  top: var(--update-banner-h, 0px);
 }
 
 html.has-app-update .top-banner-offset {
-  top: var(--update-banner-h);
+  top: var(--update-banner-h, 0px);
 }
 
 ::-webkit-scrollbar {
