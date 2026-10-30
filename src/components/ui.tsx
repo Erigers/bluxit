@@ -193,15 +193,15 @@ export function Modal({
   }, [open, onClose])
 
   if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-end p-0 md:place-items-center md:p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[70] grid place-items-end p-0 md:place-items-center md:p-4">
       <button
         type="button"
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
         aria-label="Close"
         onClick={onClose}
       />
-      <div className="card relative z-10 w-full max-h-[92dvh] overflow-auto rounded-t-3xl p-5 md:max-w-lg md:rounded-3xl">
+      <div className="card safe-bottom relative z-10 w-full max-h-[92dvh] overflow-auto rounded-t-3xl p-5 md:max-w-lg md:rounded-3xl">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">{title}</h2>
           <button
@@ -216,7 +216,8 @@ export function Modal({
         {children}
         {footer ? <div className="mt-5 flex flex-wrap justify-end gap-2">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -337,10 +338,10 @@ function MonthBoard({
   if (!open) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[70]">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/35 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
         aria-label="Close month picker"
         onClick={onClose}
       />

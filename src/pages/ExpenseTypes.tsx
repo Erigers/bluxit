@@ -228,7 +228,7 @@ export function ExpenseTypes() {
         ? createPortal(
             <>
               <div
-                className="fixed inset-0 z-[45] bg-ink/25 transition-opacity duration-300"
+                className="fixed inset-0 z-[69] bg-black/60 backdrop-blur-[2px] transition-opacity duration-300"
                 style={{
                   opacity: sheetOpen ? 1 : 0,
                   pointerEvents: draggingId ? 'none' : sheetOpen ? 'auto' : 'none',
@@ -240,7 +240,7 @@ export function ExpenseTypes() {
               />
               {draggingId && dragPoint && movingType ? (
                 <div
-                  className="pointer-events-none fixed z-[60] flex items-center gap-2 rounded-full border border-brand bg-[var(--surface)] px-3 py-2 text-sm font-medium shadow-lg"
+                  className="pointer-events-none fixed z-[80] flex items-center gap-2 rounded-full border border-brand bg-[var(--surface)] px-3 py-2 text-sm font-medium shadow-lg"
                   style={{
                     left: dragPoint.x,
                     top: dragPoint.y,
@@ -253,7 +253,7 @@ export function ExpenseTypes() {
                 </div>
               ) : null}
               <div
-                className="safe-bottom fixed inset-x-0 bottom-0 z-[46] flex flex-col rounded-t-3xl border border-b-0 border-[var(--glass-border)] bg-[var(--surface)] px-4 pt-3 shadow-[0_-12px_40px_rgba(26,26,26,0.12)]"
+                className="safe-bottom fixed inset-x-0 bottom-0 z-[70] flex flex-col rounded-t-3xl border border-b-0 border-[var(--glass-border)] bg-[var(--surface)] px-4 pt-3 shadow-[0_-12px_40px_rgba(26,26,26,0.12)]"
                 style={{
                   height: '40dvh',
                   transform: sheetOpen ? 'translateY(0)' : 'translateY(100%)',
