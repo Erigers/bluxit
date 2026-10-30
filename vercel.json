@@ -3,19 +3,19 @@
   "redirects": [
     {
       "source": "/api/cloud/desktop",
-      "has": [{ "type": "header", "key": "user-agent", "value": "(?i)windows" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*Windows.*" }],
       "destination": "https://github.com/Erigers/bluxit/releases/download/v0.1.3/bluxit_0.1.3_x64-setup.exe",
       "permanent": false
     },
     {
       "source": "/api/cloud/desktop",
-      "has": [{ "type": "header", "key": "user-agent", "value": "(?i)(macintosh|mac os x)" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(Macintosh|Mac OS X).*" }],
       "destination": "https://github.com/Erigers/bluxit/releases/download/v0.1.3/bluxit_0.1.3_aarch64.dmg",
       "permanent": false
     },
     {
       "source": "/api/cloud/desktop",
-      "has": [{ "type": "header", "key": "user-agent", "value": "(?i)linux" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*Linux.*" }],
       "destination": "https://github.com/Erigers/bluxit/releases/download/v0.1.3/bluxit_0.1.3_amd64.AppImage",
       "permanent": false
     },
