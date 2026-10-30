@@ -20,28 +20,9 @@ export function osFromUserAgent(ua: string): GuestOs {
 
 export function installerUrl(os: GuestOs): string | null {
   if (os === 'other') return null
-  return `https://github.com/${GITHUB_REPO}/releases/latest/download/${FILES[os]}`
-}
-
-async function installerExists(url: string): Promise<boolean | null> {
-  try {
-    const res = await fetch(url, {
-      method: 'HEAD',
-      redirect: 'manual',
-      headers: { 'User-Agent': 'bluxit' },
-    })
-    if (res.status === 404) return false
-    if (res.status >= 200 && res.status < 400) return true
-    return null
-  } catch {
-    return null
-  }
+  return `https://github.com/${GITHUB_REPO}/releases/download/v${DESKTOP_VERSION}/${FILES[os]}`
 }
 
 export async function resolveDesktopDownload(ua: string): Promise<string> {
-  const url = installerUrl(osFromUserAgent(ua))
-  if (!url) return RELEASES_URL
-  const exists = await installerExists(url)
-  if (exists === false) return RELEASES_URL
-  return url
+  return installerUrl(osFromUserAgent(ua)) ?? RELEASES_URL
 }
