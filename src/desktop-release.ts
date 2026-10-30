@@ -1,4 +1,6 @@
-export const DESKTOP_DOWNLOAD_HREF = '/api/cloud/desktop'
+export const DESKTOP_VERSION = '0.1.3'
+export const GITHUB_REPO = 'Erigers/bluxit'
+export const RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases/latest`
 
 export type GuestOs = 'windows' | 'macos' | 'linux' | 'other'
 
@@ -14,11 +16,23 @@ export function guestOs(): GuestOs {
   return 'other'
 }
 
+const FILES: Record<Exclude<GuestOs, 'other'>, string> = {
+  windows: `bluxit_${DESKTOP_VERSION}_x64-setup.exe`,
+  macos: `bluxit_${DESKTOP_VERSION}_aarch64.dmg`,
+  linux: `bluxit_${DESKTOP_VERSION}_amd64.AppImage`,
+}
+
 const LABELS: Record<GuestOs, string> = {
   windows: 'Download for Windows',
   macos: 'Download for macOS',
   linux: 'Download for Linux',
   other: 'Download desktop app',
+}
+
+export function desktopDownloadHref(): string {
+  const os = guestOs()
+  if (os === 'other') return RELEASES_URL
+  return `https://github.com/${GITHUB_REPO}/releases/download/v${DESKTOP_VERSION}/${FILES[os]}`
 }
 
 export function desktopDownloadLabel(): string {

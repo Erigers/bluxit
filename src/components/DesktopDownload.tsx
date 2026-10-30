@@ -1,5 +1,5 @@
 import { Monitor } from 'lucide-react'
-import { DESKTOP_DOWNLOAD_HREF, desktopDownloadLabel } from '../desktop-release'
+import { desktopDownloadHref, desktopDownloadLabel } from '../desktop-release'
 import { cn } from '../lib'
 
 export function DesktopDownload({
@@ -12,7 +12,10 @@ export function DesktopDownload({
   compact?: boolean
 }) {
   return (
-    <a href={DESKTOP_DOWNLOAD_HREF} className={cn('btn shrink-0', variant === 'primary' ? 'btn-primary' : 'btn-soft', className)}>
+    <a
+      href={desktopDownloadHref()}
+      className={cn('btn shrink-0', variant === 'primary' ? 'btn-primary' : 'btn-soft', className)}
+    >
       <span className="btn-label">
         <Monitor size={16} />
         {compact ? 'Download' : desktopDownloadLabel()}

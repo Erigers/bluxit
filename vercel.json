@@ -1,5 +1,30 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/api/cloud/desktop",
+      "has": [{ "type": "header", "key": "user-agent", "value": "(?i)windows" }],
+      "destination": "https://github.com/Erigers/bluxit/releases/download/v0.1.3/bluxit_0.1.3_x64-setup.exe",
+      "permanent": false
+    },
+    {
+      "source": "/api/cloud/desktop",
+      "has": [{ "type": "header", "key": "user-agent", "value": "(?i)(macintosh|mac os x)" }],
+      "destination": "https://github.com/Erigers/bluxit/releases/download/v0.1.3/bluxit_0.1.3_aarch64.dmg",
+      "permanent": false
+    },
+    {
+      "source": "/api/cloud/desktop",
+      "has": [{ "type": "header", "key": "user-agent", "value": "(?i)linux" }],
+      "destination": "https://github.com/Erigers/bluxit/releases/download/v0.1.3/bluxit_0.1.3_amd64.AppImage",
+      "permanent": false
+    },
+    {
+      "source": "/api/cloud/desktop",
+      "destination": "https://github.com/Erigers/bluxit/releases/latest",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/).*)",
