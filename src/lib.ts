@@ -69,6 +69,7 @@ export const CURRENCIES = [
   'HKD',
   'NZD',
   'AED',
+  'ALL',
 ]
 
 export function uid(): string {
