@@ -31,7 +31,7 @@ export const SETUP_STEPS = [
     label: 'Types',
     short: 'Types',
     to: '/types',
-    hint: 'Name the kinds of spending you want to track, then drop them into accounts.',
+    hint: 'Recurring is already there for monthly bills. Add the other kinds of spending, then drop them into accounts.',
   },
   {
     id: 'logging',
@@ -70,7 +70,7 @@ export function setupFlags(state: AppState, user: User | null) {
   const inflow =
     state.incomeSettings.some((i) => i.userId === user.id && i.monthlyAmount > 0) ||
     state.bonuses.some((b) => b.userId === user.id)
-  const types = state.expenseTypes.some((t) => t.userId === user.id)
+  const types = state.expenseTypes.some((t) => t.userId === user.id && t.builtIn !== 'recurring')
   const logging = state.expenses.some((e) => e.userId === user.id)
   return { template, accounts, inflow, types, logging }
 }

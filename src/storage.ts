@@ -1,6 +1,7 @@
 import { isDesktop, readWalletFile, writeWalletFile } from './desktop'
 import { STORAGE_KEY } from './lib'
-import type { Account, AppState, Template, User } from './types'
+import { applyRecurring } from './recurring'
+import type { Account, AppState, Expense, ExpenseType, Template, User } from './types'
 
 function migrateUser(user: User): User {
   return {
@@ -24,6 +25,20 @@ function migrateAccount(account: Account): Account {
   return {
     ...account,
     isolated: account.isolated ?? false,
+  }
+}
+
+function migrateExpenseType(type: ExpenseType): ExpenseType {
+  return {
+    ...type,
+    builtIn: type.builtIn ?? null,
+  }
+}
+
+function migrateExpense(expense: Expense): Expense {
+  return {
+    ...expense,
+    recurringOf: expense.recurringOf ?? null,
   }
 }
 
@@ -53,6 +68,8 @@ export function parseState(raw: string | null | undefined): AppState {
       users: (parsed.users ?? []).map(migrateUser),
       templates: (parsed.templates ?? []).map(migrateTemplate),
       accounts: (parsed.accounts ?? []).map(migrateAccount),
+      expenseTypes: (parsed.expenseTypes ?? []).map(migrateExpenseType),
+      expenses: (parsed.expenses ?? []).map(migrateExpense),
       version: 1,
     }
   } catch {
@@ -60,10 +77,16 @@ export function parseState(raw: string | null | undefined): AppState {
   }
 }
 
+function hydrate(state: AppState): AppState {
+  const next = applyRecurring(state)
+  if (next !== state) saveState(next)
+  return next
+}
+
 export function loadState(): AppState {
   if (isDesktop()) return emptyState()
   try {
-    return parseState(localStorage.getItem(STORAGE_KEY))
+    return hydrate(parseState(localStorage.getItem(STORAGE_KEY)))
   } catch {
     return emptyState()
   }
@@ -71,7 +94,7 @@ export function loadState(): AppState {
 
 export async function loadDesktopState(): Promise<AppState> {
   try {
-    return parseState(await readWalletFile())
+    return hydrate(parseState(await readWalletFile()))
   } catch {
     return emptyState()
   }

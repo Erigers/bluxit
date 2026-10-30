@@ -92,6 +92,7 @@ export type ExpenseType = {
   userId: string
   name: string
   color: string
+  builtIn?: 'recurring' | null
 }
 
 export type ExpenseTypeAssignment = {
@@ -112,6 +113,8 @@ export type Expense = {
   accountId: string | null
   note: string
   createdAt: string
+  recurringOf?: string | null
+  recurringUntil?: string
 }
 
 export type LocalDebt = {

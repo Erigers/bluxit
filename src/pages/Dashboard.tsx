@@ -209,6 +209,7 @@ export function Dashboard() {
                         {' '}
                         · {type?.name ?? 'Unlabeled'}
                         {account ? ` · ${account.name}` : ''}
+                        {e.recurringOf || type?.builtIn === 'recurring' ? ' · monthly' : ''}
                       </span>
                     </span>
                   </span>

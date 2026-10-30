@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Layers, Plus, Receipt, Tag, Trash2 } from 'lucide-react'
+import { ArrowLeftRight, Layers, Plus, Receipt, Repeat, Tag, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -12,6 +12,7 @@ import {
   PageHeader,
 } from '../components/ui'
 import { currentMonth, isoDate, money } from '../lib'
+import { isRecurringType } from '../recurring'
 import { useStore, useWorkspace } from '../store'
 
 export function Expenses() {
@@ -33,6 +34,9 @@ export function Expenses() {
     const assignment = ws.assignments.find((a) => a.expenseTypeId === type.id)
     return ws.accounts.find((a) => a.id === assignment?.accountId) ?? null
   }, [typeName, ws.accounts, ws.assignments, ws.types])
+  const pickedIsRecurring = ws.types.some(
+    (t) => isRecurringType(t) && t.name.toLowerCase() === typeName.trim().toLowerCase(),
+  )
 
   const suggestions = useMemo(() => {
     const q = typeName.trim().toLowerCase()
@@ -97,7 +101,7 @@ export function Expenses() {
     <div>
       <PageHeader
         title="Expenses"
-        subtitle="Adding an expense deducts it from the selected account."
+        subtitle="Adding an expense deducts it from the selected account. Recurring bills repeat every month on the same day."
         action={
           <div className="flex items-center gap-2">
             <MonthNav
@@ -128,16 +132,25 @@ export function Expenses() {
             const type = ws.types.find((t) => t.id === e.typeId)
             const account = ws.accounts.find((a) => a.id === e.accountId)
             const debt = ws.debts.find((d) => d.expenseId === e.id)
+            const recurring = Boolean(type && isRecurringType(type))
+            const series = recurring && !e.recurringOf
             return (
               <li key={e.id} className="card flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="flex items-center gap-2 font-medium">
                     <ColorDot color={type?.color ?? '#94a3b8'} />
                     {e.name}
+                    {recurring ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
+                        <Repeat size={10} />
+                        Monthly
+                      </span>
+                    ) : null}
                   </p>
                   <p className="mt-1 text-xs text-muted">
                     {e.date} · {type?.name ?? 'Unlabeled'}
                     {account ? ` · ${account.name}` : ' · no account'}
+                    {e.recurringOf ? ' · this month’s copy' : series ? ' · repeats from this date' : ''}
                   </p>
                   {debt ? (
                     <p className="mt-1 text-xs font-medium text-warn">
@@ -155,7 +168,15 @@ export function Expenses() {
                   <button
                     type="button"
                     className="rounded-lg p-2 text-muted hover:bg-brand-soft hover:text-danger"
-                    onClick={() => deleteExpense(e.id)}
+                    onClick={() => {
+                      const message = series
+                        ? `Delete “${e.name}”? Future months will stop repeating.`
+                        : e.recurringOf
+                          ? `Delete this month’s “${e.name}”? It will not come back.`
+                          : null
+                      if (message && !confirm(message)) return
+                      deleteExpense(e.id)
+                    }}
                     aria-label="Delete expense"
                   >
                     <Trash2 size={16} />
@@ -193,7 +214,15 @@ export function Expenses() {
               required
             />
           </Field>
-          <Field label="Type" hint="Pick a suggestion or type a new one. Types can be color-coded later." icon={<Tag size={16} />}>
+          <Field
+            label="Type"
+            hint={
+              pickedIsRecurring
+                ? 'This bill will repeat every month on this date, from the same account.'
+                : 'Pick a suggestion or type a new one. Recurring is already there for monthly bills.'
+            }
+            icon={<Tag size={16} />}
+          >
             <input
               className="field"
               value={typeName}
@@ -261,7 +290,9 @@ export function Expenses() {
             hint={
               assignedIsIsolated
                 ? `${assignedAccount?.name} is isolated. Take this expense from another account — that creates a local loan.`
-                : 'Autocomplete uses the account this type is dropped into. Isolated accounts are not listed.'
+                : pickedIsRecurring
+                  ? 'This account is charged every month on the same day.'
+                  : 'Autocomplete uses the account this type is dropped into. Isolated accounts are not listed.'
             }
           >
             <select

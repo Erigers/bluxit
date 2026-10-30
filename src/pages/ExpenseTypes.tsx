@@ -13,6 +13,7 @@ import {
   PageHeader,
 } from '../components/ui'
 import { PALETTE, cn } from '../lib'
+import { isRecurringType } from '../recurring'
 import { useStore, useWorkspace } from '../store'
 import type { Account, ExpenseType } from '../types'
 
@@ -110,7 +111,7 @@ export function ExpenseTypes() {
     <div>
       <PageHeader
         title="Expense types"
-        subtitle="Color-code them, then drop each type into an account — or leave it free."
+        subtitle="Recurring is already on every wallet for monthly bills. Color-code the rest, then drop each type into an account — or leave it free."
         action={
           <Button onClick={startCreate}>
             <Plus size={16} /> Type
@@ -131,7 +132,11 @@ export function ExpenseTypes() {
 
       <section className="card mb-4 p-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Unassigned</h2>
-        {unassigned.length === 0 && ws.types.length === 0 ? (
+        {unassigned.length === 0 &&
+        ws.types.length > 0 &&
+        ws.types.every((t) => isRecurringType(t)) ? (
+          <p className="text-sm text-muted">Recurring is ready. Create types like Coffee or Leisure, then drop them.</p>
+        ) : unassigned.length === 0 && ws.types.length === 0 ? (
           <p className="text-sm text-muted">Create types like Coffee or Leisure, then drop them.</p>
         ) : unassigned.length === 0 ? (
           <p className="text-sm text-muted">Every type is in an account.</p>
@@ -141,6 +146,7 @@ export function ExpenseTypes() {
               <TypeChip
                 key={t.id}
                 type={t}
+                locked={isRecurringType(t)}
                 selected={picked === t.id}
                 dragging={draggingId === t.id}
                 onSelect={() => setPicked(picked === t.id ? null : t.id)}
@@ -190,6 +196,7 @@ export function ExpenseTypes() {
                     <TypeChip
                       key={t.id}
                       type={t}
+                      locked={isRecurringType(t)}
                       selected={picked === t.id}
                       dragging={draggingId === t.id}
                       onSelect={() => setPicked(picked === t.id ? null : t.id)}
@@ -307,18 +314,27 @@ export function ExpenseTypes() {
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault()
-            if (editing) updateExpenseType(editing.id, { name, color })
-            else createExpenseType(name, color)
+            if (editing) {
+              updateExpenseType(
+                editing.id,
+                isRecurringType(editing) ? { color } : { name, color },
+              )
+            } else createExpenseType(name, color)
             setOpen(false)
           }}
         >
-          <Field label="Name" icon={<Tag size={16} />}>
+          <Field
+            label="Name"
+            icon={<Tag size={16} />}
+            hint={editing && isRecurringType(editing) ? 'Recurring stays on every wallet. Expenses with this type repeat each month on the same day, from the same account.' : undefined}
+          >
             <input
               className="field"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Leisure"
               required
+              disabled={Boolean(editing && isRecurringType(editing))}
             />
           </Field>
           <Field label="Color">
@@ -381,6 +397,7 @@ function AccountBucket({
 
 function TypeChip({
   type,
+  locked,
   selected,
   dragging,
   onSelect,
@@ -393,6 +410,7 @@ function TypeChip({
   onHandleDragCancel,
 }: {
   type: ExpenseType
+  locked?: boolean
   selected: boolean
   dragging?: boolean
   onSelect: () => void
@@ -467,17 +485,19 @@ function TypeChip({
             <X size={18} />
           </ChipAction>
         ) : null}
-        <ChipAction
-          label="Delete type"
-          danger
-          onClick={() => {
-            if (confirm(`Delete type “${type.name}”? Expenses keep their amount, without this label.`)) {
-              onDelete()
-            }
-          }}
-        >
-          <Trash2 size={18} />
-        </ChipAction>
+        {locked ? null : (
+          <ChipAction
+            label="Delete type"
+            danger
+            onClick={() => {
+              if (confirm(`Delete type “${type.name}”? Expenses keep their amount, without this label.`)) {
+                onDelete()
+              }
+            }}
+          >
+            <Trash2 size={18} />
+          </ChipAction>
+        )}
       </div>
     </div>
   )

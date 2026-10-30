@@ -29,6 +29,7 @@ import {
   touchActivity,
   uid,
 } from './lib'
+import { applyRecurring, isRecurringName, isRecurringType } from './recurring'
 import { emptyState, loadDesktopState, loadState, saveState } from './storage'
 import type {
   Account,
@@ -48,8 +49,9 @@ function reducer(_state: AppState, action: Action): AppState {
 }
 
 function persist(state: AppState): AppState {
-  saveState(state)
-  return state
+  const next = applyRecurring(state)
+  saveState(next)
+  return next
 }
 
 type StoreApi = {
@@ -385,8 +387,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             existing = {
               id: uid(),
               userId: user.id,
-              name: trimmed,
+              name: isRecurringName(trimmed) ? 'Recurring' : trimmed,
               color: type.color,
+              builtIn: isRecurringName(trimmed) ? 'recurring' : null,
             }
             types = [...types, existing]
           }
@@ -635,6 +638,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         (t) => t.userId === user.id && t.name.toLowerCase() === trimmed.toLowerCase(),
       )
       if (existing) return existing.id
+      if (isRecurringName(trimmed)) {
+        const builtIn = state.expenseTypes.find((t) => t.userId === user.id && isRecurringType(t))
+        if (builtIn) return builtIn.id
+      }
       const id = uid()
       commit({
         ...state,
@@ -657,7 +664,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (id, patch) => {
       commit({
         ...state,
-        expenseTypes: state.expenseTypes.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        expenseTypes: state.expenseTypes.map((t) => {
+          if (t.id !== id) return t
+          if (isRecurringType(t)) return { ...t, color: patch.color ?? t.color, name: t.name, builtIn: 'recurring' }
+          if (patch.name && isRecurringName(patch.name)) return t
+          return { ...t, ...patch }
+        }),
       })
     },
     [commit, state],
@@ -665,6 +677,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const deleteExpenseType: StoreApi['deleteExpenseType'] = useCallback(
     (id) => {
+      const type = state.expenseTypes.find((t) => t.id === id)
+      if (type && isRecurringType(type)) return
       commit({
         ...state,
         expenseTypes: state.expenseTypes.filter((t) => t.id !== id),
@@ -737,6 +751,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         accountId: spendFrom?.id ?? null,
         note: input.note.trim(),
         createdAt: nowISO(),
+        recurringOf: null,
       }
       let debts = state.localDebts
       let debtCreated = false
@@ -974,7 +989,10 @@ export function useWorkspace(month = currentMonth()) {
     const templates = state.templates.filter((t) => t.userId === user.id)
     const template = templates.find((t) => t.id === user.activeTemplateId) ?? null
     const accounts = state.accounts.filter((a) => a.templateId === template?.id)
-    const types = state.expenseTypes.filter((t) => t.userId === user.id)
+    const types = state.expenseTypes
+      .filter((t) => t.userId === user.id)
+      .slice()
+      .sort((a, b) => Number(isRecurringType(b)) - Number(isRecurringType(a)))
     const assignments = state.expenseTypeAssignments.filter(
       (a) => a.templateId === template?.id,
     )
