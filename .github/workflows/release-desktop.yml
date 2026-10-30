@@ -55,8 +55,18 @@ jobs:
             echo "TAURI_SIGNING_PRIVATE_KEY secret is missing"
             exit 1
           fi
-          printf '%s\n' "$TAURI_SIGNING_PRIVATE_KEY" > "$RUNNER_TEMP/tauri.key"
-          echo "TAURI_SIGNING_PRIVATE_KEY=$RUNNER_TEMP/tauri.key" >> "$GITHUB_ENV"
+          KEY=$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | tr -d '\r' | sed '/^untrusted comment/d' | tr -d '\n ')
+          if [ -z "$KEY" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY secret is empty after stripping"
+            exit 1
+          fi
+          printf '%s' "$KEY" > "$RUNNER_TEMP/tauri.key"
+          if command -v cygpath >/dev/null; then
+            KEY_PATH=$(cygpath -m "$RUNNER_TEMP/tauri.key")
+          else
+            KEY_PATH="$RUNNER_TEMP/tauri.key"
+          fi
+          echo "TAURI_SIGNING_PRIVATE_KEY=${KEY_PATH}" >> "$GITHUB_ENV"
 
       - uses: tauri-apps/tauri-action@v1
         env:
