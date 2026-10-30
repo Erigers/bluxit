@@ -45,6 +45,7 @@ export const SUGGESTED_TYPES = [
 ]
 
 export const CURRENCIES = [
+  'ALL',
   'USD',
   'EUR',
   'GBP',
@@ -69,7 +70,6 @@ export const CURRENCIES = [
   'HKD',
   'NZD',
   'AED',
-  'ALL',
 ]
 
 export function uid(): string {
