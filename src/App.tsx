@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { SpeedInsights } from '@vercel/speed-insights/react'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { Accounts } from './pages/Accounts'
 import { AuthPage } from './pages/AuthPage'
@@ -17,6 +18,11 @@ function RequireAuth() {
   const { user } = useStore()
   if (!user) return <Navigate to="/login" replace />
   return <Outlet />
+}
+
+function Insights() {
+  const { pathname } = useLocation()
+  return <SpeedInsights route={pathname} />
 }
 
 function AppRoutes() {
@@ -48,6 +54,7 @@ export default function App() {
     <AppProvider>
       <BrowserRouter>
         <AppRoutes />
+        <Insights />
       </BrowserRouter>
     </AppProvider>
   )
