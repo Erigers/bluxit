@@ -46,16 +46,28 @@ jobs:
       - name: Install frontend
         run: npm ci
 
+      - name: Prepare updater signing key
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY secret is missing"
+            exit 1
+          fi
+          printf '%s\n' "$TAURI_SIGNING_PRIVATE_KEY" > "$RUNNER_TEMP/tauri.key"
+          echo "TAURI_SIGNING_PRIVATE_KEY=$RUNNER_TEMP/tauri.key" >> "$GITHUB_ENV"
+
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: v__VERSION__
           releaseName: 'bluxit v__VERSION__'
           releaseBody: 'Desktop app for Windows, macOS, and Linux. Pick a file for the wallet on first launch.'
           releaseDraft: false
           prerelease: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
+          updaterJsonPreferNsis: true
+          retryAttempts: 5
           args: ${{ matrix.args }}
