@@ -130,6 +130,7 @@ export function Templates() {
         subtitle="A template is a set of accounts. Share the names and type colors — never the money."
         action={
           <Button
+            className="btn-pad-x whitespace-nowrap"
             onClick={() => {
               setEditingId(null)
               setName('')

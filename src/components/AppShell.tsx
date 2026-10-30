@@ -55,9 +55,14 @@ export function AppShell() {
     void flushCloudEvents()
   }, [])
 
+  useEffect(() => {
+    document.documentElement.classList.add('app-locked')
+    return () => document.documentElement.classList.remove('app-locked')
+  }, [])
+
   return (
-    <div className="min-h-dvh bg-bg text-ink">
-      <header className="sticky top-0 z-40 overflow-visible">
+    <div className="app-shell fixed inset-0 flex flex-col overflow-hidden bg-bg text-ink">
+      <header className="z-40 shrink-0 overflow-visible">
         <div className="flex h-14 items-center gap-3 bg-[color-mix(in_srgb,var(--surface)_90%,transparent)] px-4 backdrop-blur-xl md:h-16 md:px-6">
           <Link to="/home" aria-label="bluxit home" className="shrink-0">
             <Logo className="text-base md:text-2xl" markClassName="h-7 w-7 md:h-10 md:w-10" />
@@ -73,29 +78,31 @@ export function AppShell() {
         <CloudEdge className="-mt-px" />
       </header>
 
-      <aside className="fixed bottom-0 left-0 top-14 z-30 hidden w-60 flex-col border-r border-line/70 bg-[var(--glass)] px-4 pb-5 pt-8 backdrop-blur-xl md:top-16 md:flex">
-        <nav className="grid gap-1 text-sm">
-          {PRIMARY.filter((i) => i.to !== '/more').map((item) => (
-            <SideLink key={item.to} {...item} />
-          ))}
-          <div className="my-3 h-px bg-line" />
-          {MORE.map((item) => (
-            <SideLink key={item.to} {...item} />
-          ))}
-        </nav>
-        <div className="mt-auto grid gap-3 px-1">
-          <ThemeToggle compact />
-        </div>
-      </aside>
+      <div className="flex min-h-0 flex-1">
+        <aside className="z-30 hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-line/70 bg-[var(--glass)] px-4 pb-5 pt-8 backdrop-blur-xl md:flex">
+          <nav className="grid gap-1 text-sm">
+            {PRIMARY.filter((i) => i.to !== '/more').map((item) => (
+              <SideLink key={item.to} {...item} />
+            ))}
+            <div className="my-3 h-px bg-line" />
+            {MORE.map((item) => (
+              <SideLink key={item.to} {...item} />
+            ))}
+          </nav>
+          <div className="mt-auto grid gap-3 px-1">
+            <ThemeToggle compact />
+          </div>
+        </aside>
 
-      <main className="px-4 pb-28 pt-2 md:ml-60 md:px-8 md:pb-10 md:pt-4">
-        <div className="mx-auto max-w-5xl">
-          <SetupGuide />
-          <Outlet />
-        </div>
-      </main>
+        <main className="app-scroll min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 md:px-8 md:pb-10 md:pt-4">
+          <div className="mx-auto max-w-5xl">
+            <SetupGuide />
+            <Outlet />
+          </div>
+        </main>
+      </div>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-[var(--glass)] px-2 pt-2 backdrop-blur-xl md:hidden">
+      <nav className="safe-bottom z-30 shrink-0 border-t border-line/70 bg-[var(--glass)] px-2 pt-2 backdrop-blur-xl md:hidden">
         <ul className="grid grid-cols-5">
           {PRIMARY.map((item) => (
             <li key={item.to}>

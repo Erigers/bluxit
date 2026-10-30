@@ -157,7 +157,7 @@ export function Landing() {
 
   return (
     <div className="min-h-dvh bg-bg text-ink">
-      <header className="sticky top-0 z-30 border-b border-transparent bg-[var(--glass)] backdrop-blur-xl">
+      <header className="top-banner-offset sticky top-0 z-30 border-b border-transparent bg-[var(--glass)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/" aria-label="bluxit home">
             <Logo className="text-base md:text-2xl" markClassName="h-7 w-7 md:h-10 md:w-10" />

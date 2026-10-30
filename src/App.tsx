@@ -12,6 +12,7 @@ import { Income } from './pages/Income'
 import { More } from './pages/More'
 import { Settings } from './pages/Settings'
 import { Templates } from './pages/Templates'
+import { UpdateBanner } from './components/UpdateBanner'
 import { AppProvider, useStore } from './store'
 
 function RequireAuth() {
@@ -53,6 +54,7 @@ export default function App() {
   return (
     <AppProvider>
       <BrowserRouter>
+        <UpdateBanner />
         <AppRoutes />
         <Insights />
       </BrowserRouter>

@@ -1,5 +1,5 @@
-import { Layers, Pencil, Plus, Tag, Trash2, Wallet, X } from 'lucide-react'
-import { useState, type DragEvent, type ReactNode } from 'react'
+import { GripVertical, Layers, Pencil, Plus, Tag, Trash2, Wallet, X } from 'lucide-react'
+import { useState, type PointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import {
@@ -26,6 +26,7 @@ export function ExpenseTypes() {
   const [picked, setPicked] = useState<string | null>(null)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [overAccount, setOverAccount] = useState<string | null>(null)
+  const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null)
 
   const assignedIds = new Set(ws.assignments.map((a) => a.expenseTypeId))
   const unassigned = ws.types.filter((t) => !assignedIds.has(t.id))
@@ -53,18 +54,36 @@ export function ExpenseTypes() {
     setPicked(null)
     setDraggingId(null)
     setOverAccount(null)
+    setDragPoint(null)
   }
 
-  const beginDrag = (typeId: string, e: DragEvent) => {
-    e.dataTransfer.setData('text/plain', typeId)
-    e.dataTransfer.setData('text/type-id', typeId)
-    e.dataTransfer.effectAllowed = 'move'
-    window.setTimeout(() => setDraggingId(typeId), 0)
+  const accountIdAt = (x: number, y: number) => {
+    const node = document.elementFromPoint(x, y)
+    return node?.closest('[data-account-id]')?.getAttribute('data-account-id') ?? null
+  }
+
+  const beginHandleDrag = (typeId: string, x: number, y: number) => {
+    setPicked(null)
+    setDraggingId(typeId)
+    setDragPoint({ x, y })
+    setOverAccount(accountIdAt(x, y))
+  }
+
+  const moveHandleDrag = (x: number, y: number) => {
+    setDragPoint({ x, y })
+    setOverAccount(accountIdAt(x, y))
+  }
+
+  const finishHandleDrag = (typeId: string, x: number, y: number) => {
+    const accountId = accountIdAt(x, y)
+    if (accountId) onDrop(accountId, typeId)
+    else endDrag()
   }
 
   const endDrag = () => {
     setDraggingId(null)
     setOverAccount(null)
+    setDragPoint(null)
   }
 
   if (!ws.template) {
@@ -105,8 +124,8 @@ export function ExpenseTypes() {
         </p>
       ) : (
         <p className="mb-3 text-sm text-muted">
-          Drag a type — account buckets slide up from the bottom. On a phone, tap a type, then tap a
-          bucket.
+          Drag from the handle beside the color — account buckets slide up from the bottom. You can
+          also tap a type, then tap a bucket.
         </p>
       )}
 
@@ -127,8 +146,10 @@ export function ExpenseTypes() {
                 onSelect={() => setPicked(picked === t.id ? null : t.id)}
                 onEdit={() => startEdit(t)}
                 onDelete={() => deleteExpenseType(t.id)}
-                onDragBegin={(e) => beginDrag(t.id, e)}
-                onDragFinish={endDrag}
+                onHandleDragStart={(x, y) => beginHandleDrag(t.id, x, y)}
+                onHandleDragMove={moveHandleDrag}
+                onHandleDragEnd={(x, y) => finishHandleDrag(t.id, x, y)}
+                onHandleDragCancel={endDrag}
               />
             ))}
           </div>
@@ -143,13 +164,14 @@ export function ExpenseTypes() {
           return (
             <section
               key={account.id}
+              data-account-id={account.id}
               className={cn(
                 'card min-h-36 p-4 transition',
                 picked ? 'ring-2 ring-brand/40' : '',
               )}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
-                const id = e.dataTransfer.getData('text/type-id')
+                const id = e.dataTransfer.getData('text/type-id') || e.dataTransfer.getData('text/plain')
                 if (id) onDrop(account.id, id)
               }}
               onClick={() => {
@@ -174,8 +196,10 @@ export function ExpenseTypes() {
                       onEdit={() => startEdit(t)}
                       onDelete={() => deleteExpenseType(t.id)}
                       onUnassign={() => assignType(t.id, null)}
-                      onDragBegin={(e) => beginDrag(t.id, e)}
-                      onDragFinish={endDrag}
+                      onHandleDragStart={(x, y) => beginHandleDrag(t.id, x, y)}
+                      onHandleDragMove={moveHandleDrag}
+                      onHandleDragEnd={(x, y) => finishHandleDrag(t.id, x, y)}
+                      onHandleDragCancel={endDrag}
                     />
                   ))
                 )}
@@ -214,6 +238,20 @@ export function ExpenseTypes() {
                 }}
                 aria-hidden
               />
+              {draggingId && dragPoint && movingType ? (
+                <div
+                  className="pointer-events-none fixed z-[60] flex items-center gap-2 rounded-full border border-brand bg-[var(--surface)] px-3 py-2 text-sm font-medium shadow-lg"
+                  style={{
+                    left: dragPoint.x,
+                    top: dragPoint.y,
+                    transform: 'translate(-12px, -22px)',
+                  }}
+                >
+                  <GripVertical size={14} className="text-muted" />
+                  <ColorDot color={movingType.color} size={14} />
+                  {movingType.name}
+                </div>
+              ) : null}
               <div
                 className="safe-bottom fixed inset-x-0 bottom-0 z-[46] flex flex-col rounded-t-3xl border border-b-0 border-[var(--glass-border)] bg-[var(--surface)] px-4 pt-3 shadow-[0_-12px_40px_rgba(26,26,26,0.12)]"
                 style={{
@@ -243,7 +281,7 @@ export function ExpenseTypes() {
                       <li key={account.id} className="min-h-0">
                         <AccountBucket
                           account={account}
-                          ready={Boolean(picked)}
+                          ready={Boolean(picked || draggingId)}
                           hovering={overAccount === account.id}
                           onDragOver={() => setOverAccount(account.id)}
                           onDragLeave={() =>
@@ -313,6 +351,7 @@ function AccountBucket({
   return (
     <button
       type="button"
+      data-account-id={account.id}
       className={cn(
         'flex h-full min-h-20 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-3 py-3 text-center transition',
         hovering
@@ -348,8 +387,10 @@ function TypeChip({
   onEdit,
   onDelete,
   onUnassign,
-  onDragBegin,
-  onDragFinish,
+  onHandleDragStart,
+  onHandleDragMove,
+  onHandleDragEnd,
+  onHandleDragCancel,
 }: {
   type: ExpenseType
   selected: boolean
@@ -358,15 +399,33 @@ function TypeChip({
   onEdit: () => void
   onDelete: () => void
   onUnassign?: () => void
-  onDragBegin: (e: DragEvent) => void
-  onDragFinish: () => void
+  onHandleDragStart: (x: number, y: number) => void
+  onHandleDragMove: (x: number, y: number) => void
+  onHandleDragEnd: (x: number, y: number) => void
+  onHandleDragCancel: () => void
 }) {
+  const onHandlePointerDown = (e: PointerEvent<HTMLButtonElement>) => {
+    if (e.button !== 0 && e.button !== -1) return
+    e.preventDefault()
+    e.stopPropagation()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    onHandleDragStart(e.clientX, e.clientY)
+  }
+
+  const onHandlePointerMove = (e: PointerEvent<HTMLButtonElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
+    onHandleDragMove(e.clientX, e.clientY)
+  }
+
+  const onHandlePointerUp = (e: PointerEvent<HTMLButtonElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    onHandleDragEnd(e.clientX, e.clientY)
+  }
+
   return (
     <div
-      draggable
       onClick={(e) => e.stopPropagation()}
-      onDragStart={(e) => onDragBegin(e)}
-      onDragEnd={onDragFinish}
       className={cn(
         'flex items-center rounded-full border backdrop-blur-md sm:inline-flex sm:max-w-full',
         selected || dragging
@@ -377,7 +436,23 @@ function TypeChip({
     >
       <button
         type="button"
-        className="flex min-h-11 min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left text-sm font-medium"
+        className="grid h-11 w-10 shrink-0 touch-none cursor-grab place-items-center text-muted active:cursor-grabbing"
+        aria-label={`Drag ${type.name}`}
+        onPointerDown={onHandlePointerDown}
+        onPointerMove={onHandlePointerMove}
+        onPointerUp={onHandlePointerUp}
+        onPointerCancel={(e) => {
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId)
+          }
+          onHandleDragCancel()
+        }}
+      >
+        <GripVertical size={16} />
+      </button>
+      <button
+        type="button"
+        className="flex min-h-11 min-w-0 flex-1 items-center gap-2 py-2 pr-3 pl-0 text-left text-sm font-medium"
         onClick={onSelect}
       >
         <ColorDot color={type.color} size={14} />

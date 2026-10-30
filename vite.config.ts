@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     cloudApiPlugin(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192.png', 'pwa-512.png', 'pwa-512-maskable.png'],
       manifest: {
         id: '/',

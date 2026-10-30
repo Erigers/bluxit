@@ -146,28 +146,6 @@ export function Income() {
         </div>
       ) : null}
 
-      <section className="card mb-4 p-4">
-        <h2 className="font-semibold">Do you have more than one monthly salary?</h2>
-        <p className="mt-1 text-sm text-muted">
-          A second job, a pension, support — anything that lands every month. Bonuses stay in their own
-          list below.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button
-            variant={!multiple ? 'primary' : 'outline'}
-            onClick={chooseOneSalary}
-          >
-            No, just one
-          </Button>
-          <Button
-            variant={multiple ? 'primary' : 'outline'}
-            onClick={chooseManySalaries}
-          >
-            Yes, more than one
-          </Button>
-        </div>
-      </section>
-
       {multiple ? (
         <section className="card mb-4 p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -232,6 +210,28 @@ export function Income() {
           </div>
         </form>
       )}
+
+      <section className="card mb-4 p-4">
+        <h2 className="font-semibold">Do you have more than one monthly salary?</h2>
+        <p className="mt-1 text-sm text-muted">
+          A second job, a pension, support — anything that lands every month. Bonuses stay in their own
+          list below.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button
+            variant={!multiple ? 'primary' : 'outline'}
+            onClick={chooseOneSalary}
+          >
+            No, just one
+          </Button>
+          <Button
+            variant={multiple ? 'primary' : 'outline'}
+            onClick={chooseManySalaries}
+          >
+            Yes, more than one
+          </Button>
+        </div>
+      </section>
 
       <section className="card mb-4 p-4">
         <div className="mb-3 flex items-center justify-between">
