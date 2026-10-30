@@ -187,7 +187,7 @@ export function Landing() {
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <ThemeToggle compact />
             {user ? (
               <Cta to="/home">
@@ -200,6 +200,7 @@ export function Landing() {
                 Just begin
               </Cta>
             )}
+            <DesktopDownload compact />
           </div>
         </div>
       </header>
