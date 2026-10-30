@@ -1,3 +1,4 @@
+import { isDesktop, readWalletFile, writeWalletFile } from './desktop'
 import { STORAGE_KEY } from './lib'
 import type { Account, AppState, Template, User } from './types'
 
@@ -41,11 +42,11 @@ export const emptyState = (): AppState => ({
   localDebts: [],
 })
 
-export function loadState(): AppState {
+export function parseState(raw: string | null | undefined): AppState {
+  if (!raw) return emptyState()
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return emptyState()
     const parsed = JSON.parse(raw) as Partial<AppState>
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return emptyState()
     return {
       ...emptyState(),
       ...parsed,
@@ -59,6 +60,34 @@ export function loadState(): AppState {
   }
 }
 
+export function loadState(): AppState {
+  if (isDesktop()) return emptyState()
+  try {
+    return parseState(localStorage.getItem(STORAGE_KEY))
+  } catch {
+    return emptyState()
+  }
+}
+
+export async function loadDesktopState(): Promise<AppState> {
+  try {
+    return parseState(await readWalletFile())
+  } catch {
+    return emptyState()
+  }
+}
+
+let writeQueue: Promise<void> = Promise.resolve()
+
 export function saveState(state: AppState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  const json = JSON.stringify(state)
+  if (isDesktop()) {
+    writeQueue = writeQueue
+      .then(() => writeWalletFile(json))
+      .catch((err: unknown) => {
+        console.error('Could not save the wallet file.', err)
+      })
+    return
+  }
+  localStorage.setItem(STORAGE_KEY, json)
 }

@@ -2,6 +2,7 @@ import { ArrowDownRight, ArrowUpRight, Layers, Scale, Wallet } from 'lucide-reac
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountBars, CashflowArea, DonutChart } from '../components/Charts'
+import { RateApp } from '../components/RateApp'
 import { Button, EmptyState, Money, MonthNav, PageHeader } from '../components/ui'
 import { cashInflowForMonth, monthExpenses } from '../finance'
 import { currentMonth, money, shiftMonth } from '../lib'
@@ -70,6 +71,9 @@ export function Dashboard() {
             }
           />
         )}
+        <div className="mt-4">
+          <RateApp />
+        </div>
       </div>
     )
   }
@@ -215,6 +219,10 @@ export function Dashboard() {
           </ul>
         )}
       </section>
+
+      <div className="mt-4">
+        <RateApp />
+      </div>
     </div>
   )
 }

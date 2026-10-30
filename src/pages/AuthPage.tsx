@@ -6,6 +6,7 @@ import { PinInput } from '../components/PinInput'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { Button, Field } from '../components/ui'
 import { flushCloudEvents, trackCloudEvent } from '../cloud'
+import { isDesktop } from '../desktop'
 import { applyTheme, isPin } from '../lib'
 import { postAuthPath } from '../setup'
 import { usePrefersDark, useStore } from '../store'
@@ -63,7 +64,9 @@ export function AuthPage() {
           </Link>
           <p className="mt-3 text-lg font-medium text-ink">Track your money. Keep your freedom.</p>
           <p className="mt-2 text-sm text-muted">
-            Free forever. Username, PIN, and wallet stay on this device — never uploaded to check uniqueness.
+            {isDesktop()
+              ? 'Free forever. Username, PIN, and wallet stay in the file you chose — never uploaded to check uniqueness.'
+              : 'Free forever. Username, PIN, and wallet stay on this device — never uploaded to check uniqueness.'}
           </p>
         </div>
         <form

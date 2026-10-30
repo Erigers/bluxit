@@ -1,4 +1,4 @@
-import { CLOUD_KEY, EVENT_QUEUE_KEY, deviceId, uid } from './lib'
+import { CLOUD_KEY, EVENT_QUEUE_KEY, RATING_KEY, deviceId, uid } from './lib'
 import type { AppState, CloudAccount, CloudTemplate, CloudType } from './types'
 
 export type CloudShareDraft = {
@@ -163,6 +163,50 @@ export async function unpublishCloudTemplate(id: string, ownerId: string): Promi
 }
 
 export type CloudEventId = 'begin' | 'pin_unlock'
+
+export type RatingStats = {
+  count: number
+  average: number
+  histogram: [number, number, number, number, number]
+}
+
+const emptyRatings = (): RatingStats => ({
+  count: 0,
+  average: 0,
+  histogram: [0, 0, 0, 0, 0],
+})
+
+export function readLocalRating(): number | null {
+  try {
+    const n = Number(localStorage.getItem(RATING_KEY))
+    if (!Number.isInteger(n) || n < 1 || n > 5) return null
+    return n
+  } catch {
+    return null
+  }
+}
+
+function writeLocalRating(stars: number) {
+  localStorage.setItem(RATING_KEY, String(stars))
+}
+
+export async function fetchRatings(): Promise<RatingStats> {
+  const remote = await request<RatingStats>('/ratings')
+  if (remote.kind === 'ok' && Array.isArray(remote.data.histogram)) return remote.data
+  return emptyRatings()
+}
+
+export async function submitRating(stars: number): Promise<RatingStats | null> {
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) return null
+  writeLocalRating(stars)
+  const remote = await request<RatingStats>('/ratings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId: deviceId(), stars }),
+  })
+  if (remote.kind === 'ok') return remote.data
+  return null
+}
 
 function readEventQueue(): string[] {
   try {

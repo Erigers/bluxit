@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Connect, Plugin } from 'vite'
+import { getRatingStats, saveRating } from './ratings.ts'
 
 type CloudType = { name: string; color: string }
 type CloudAccount = {
@@ -152,6 +153,26 @@ const handler: Connect.NextHandleFunction = (req, res, next) => {
   void (async () => {
     const method = (req.method ?? 'GET').toUpperCase()
     const rest = pathname.slice('/api/cloud'.length)
+
+    if (method === 'GET' && rest === '/ratings') {
+      send(res, 200, await getRatingStats())
+      return
+    }
+
+    if (method === 'POST' && rest === '/ratings') {
+      if (!allowEvent(req)) {
+        send(res, 429, { error: 'Too many ratings' })
+        return
+      }
+      const payload = JSON.parse((await readBody(req)) || '{}') as { deviceId?: string; stars?: unknown }
+      const result = await saveRating(String(payload.deviceId ?? ''), payload.stars)
+      if ('error' in result) {
+        send(res, result.status, { error: result.error })
+        return
+      }
+      send(res, 200, result)
+      return
+    }
 
     if (method === 'POST' && rest === '/events') {
       if (!allowEvent(req)) {

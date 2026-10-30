@@ -5,6 +5,7 @@ export const THEME_KEY = 'bluxit:theme'
 export const CLOUD_KEY = 'bluxit:cloud'
 export const DEVICE_KEY = 'bluxit:device-id'
 export const EVENT_QUEUE_KEY = 'bluxit:event-queue'
+export const RATING_KEY = 'bluxit:rating'
 export const PIN_IDLE_MS = 20 * 60 * 1000
 
 export const PALETTE = [

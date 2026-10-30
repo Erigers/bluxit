@@ -12,7 +12,9 @@ import { Income } from './pages/Income'
 import { More } from './pages/More'
 import { Settings } from './pages/Settings'
 import { Templates } from './pages/Templates'
+import { DesktopShell } from './components/DesktopShell'
 import { UpdateBanner } from './components/UpdateBanner'
+import { isDesktop } from './desktop'
 import { AppProvider, useStore } from './store'
 
 function RequireAuth() {
@@ -23,6 +25,7 @@ function RequireAuth() {
 
 function Insights() {
   const { pathname } = useLocation()
+  if (isDesktop()) return null
   return <SpeedInsights route={pathname} />
 }
 
@@ -52,12 +55,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <BrowserRouter>
-        <UpdateBanner />
-        <AppRoutes />
-        <Insights />
-      </BrowserRouter>
-    </AppProvider>
+    <DesktopShell>
+      <AppProvider>
+        <BrowserRouter>
+          <UpdateBanner />
+          <AppRoutes />
+          <Insights />
+        </BrowserRouter>
+      </AppProvider>
+    </DesktopShell>
   )
 }

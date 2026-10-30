@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { isDesktop } from '../desktop'
 import { Button } from './ui'
 
 function isStandalone() {
@@ -15,10 +16,12 @@ function isIos() {
 }
 
 export function InstallApp() {
+  const desktop = isDesktop()
   const [installed, setInstalled] = useState(isStandalone)
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
+    if (desktop) return
     const onPrompt = (event: BeforeInstallPromptEvent) => {
       event.preventDefault()
       setPromptEvent(event)
@@ -33,7 +36,15 @@ export function InstallApp() {
       window.removeEventListener('beforeinstallprompt', onPrompt)
       window.removeEventListener('appinstalled', onInstalled)
     }
-  }, [])
+  }, [desktop])
+
+  if (desktop) {
+    return (
+      <p className="text-sm text-muted">
+        You are using the bluxit desktop app. Your wallet is the file you chose, not browser storage.
+      </p>
+    )
+  }
 
   if (installed) {
     return (

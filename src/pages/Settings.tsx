@@ -1,10 +1,18 @@
-import { Download, KeyRound, LogOut, Trash2, Upload, User } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { Download, FolderOpen, HardDrive, KeyRound, LogOut, Trash2, Upload, User } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { InstallApp } from '../components/InstallApp'
 import { PinInput } from '../components/PinInput'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { Button, Field, Modal, PageHeader } from '../components/ui'
+import {
+  getWalletPath,
+  isDesktop,
+  moveWallet,
+  pickExistingWalletFile,
+  pickNewWalletFile,
+  setWalletPath,
+} from '../desktop'
 import { downloadJson, isPin } from '../lib'
 import { emptyState } from '../storage'
 import { useStore } from '../store'
@@ -25,12 +33,21 @@ export function Settings() {
 
   return (
     <div>
-      <PageHeader title="Settings" subtitle="Everything here is stored on this device." />
+      <PageHeader
+        title="Settings"
+        subtitle={
+          isDesktop()
+            ? 'Everything here is stored in the wallet file you chose.'
+            : 'Everything here is stored on this device.'
+        }
+      />
 
-      <section className="card mb-4 grid gap-3 p-4">
-        <h2 className="font-semibold">Install app</h2>
-        <InstallApp />
-      </section>
+      {isDesktop() ? <WalletFileCard /> : (
+        <section className="card mb-4 grid gap-3 p-4">
+          <h2 className="font-semibold">Install app</h2>
+          <InstallApp />
+        </section>
+      )}
 
       <section className="card mb-4 grid gap-3 p-4">
         <h2 className="font-semibold">Profile</h2>
@@ -105,8 +122,9 @@ export function Settings() {
       <section className="card mb-4 grid gap-3 p-4">
         <h2 className="font-semibold">On this device</h2>
         <p className="text-sm text-muted">
-          Templates, accounts, income, expenses, and debts stay in local storage. Server sync can
-          come later — export a copy if you switch phones.
+          {isDesktop()
+            ? 'Templates, accounts, income, expenses, and debts stay in your wallet file. Export a copy if you want a second backup.'
+            : 'Templates, accounts, income, expenses, and debts stay in local storage. Server sync can come later — export a copy if you switch phones.'}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -207,5 +225,71 @@ export function Settings() {
         </div>
       </Modal>
     </div>
+  )
+}
+
+function WalletFileCard() {
+  const [path, setPath] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    void getWalletPath().then(setPath)
+  }, [])
+
+  const run = async (work: () => Promise<void>) => {
+    setBusy(true)
+    setError('')
+    try {
+      await work()
+      window.location.reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not change that location.')
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="card mb-4 grid gap-3 p-4">
+      <h2 className="font-semibold">Wallet file</h2>
+      <p className="text-sm text-muted">
+        This desktop app writes your accounts and spending to a JSON file you choose. Change the
+        place any time — a copy of the current wallet is written there.
+      </p>
+      <p className="break-all rounded-2xl bg-[var(--control)] px-3 py-2 text-xs text-ink">
+        {path || 'No location chosen yet.'}
+      </p>
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          disabled={busy}
+          onClick={() =>
+            void run(async () => {
+              const next = await pickNewWalletFile(path || 'bluxit.json')
+              if (!next) throw new Error('Pick a file to continue.')
+              await moveWallet(next)
+            })
+          }
+        >
+          <HardDrive size={16} />
+          {busy ? 'Moving…' : 'Change location'}
+        </Button>
+        <Button
+          variant="ghost"
+          disabled={busy}
+          onClick={() =>
+            void run(async () => {
+              const next = await pickExistingWalletFile()
+              if (!next) throw new Error('Pick a wallet file to continue.')
+              await setWalletPath(next)
+            })
+          }
+        >
+          <FolderOpen size={16} />
+          Open a different file
+        </Button>
+      </div>
+    </section>
   )
 }

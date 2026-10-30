@@ -10,11 +10,13 @@ lerna-debug.log*
 node_modules
 dist
 dev-dist
+src-tauri/target
 dist-ssr
 *.local
 .vercel
 data/cloud-templates.json
 data/cloud-events.json
+data/cloud-ratings.json
 
 # Editor directories and files
 .vscode/*

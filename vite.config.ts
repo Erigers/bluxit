@@ -4,12 +4,35 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { cloudApiPlugin } from './server/cloud-plugin.ts'
 
+const host = process.env.TAURI_DEV_HOST
+const tauri = Boolean(
+  process.env.TAURI_ENV_PLATFORM || process.env.TAURI_ENV_DEBUG || process.env.TAURI_DEV_HOST,
+)
+
 export default defineConfig({
+  clearScreen: false,
+  envPrefix: ['VITE_', 'TAURI_ENV_*'],
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: host || false,
+    hmr: host
+      ? {
+          protocol: 'ws',
+          host,
+          port: 1421,
+        }
+      : undefined,
+    watch: {
+      ignored: ['**/src-tauri/**'],
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
     cloudApiPlugin(),
     VitePWA({
+      disable: tauri,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192.png', 'pwa-512.png', 'pwa-512-maskable.png'],
       manifest: {

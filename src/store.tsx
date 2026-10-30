@@ -2,11 +2,14 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useState,
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
+import { isDesktop } from './desktop'
 import {
   accountBalance,
   cashInflowForMonth,
@@ -26,7 +29,7 @@ import {
   touchActivity,
   uid,
 } from './lib'
-import { emptyState, loadState, saveState } from './storage'
+import { emptyState, loadDesktopState, loadState, saveState } from './storage'
 import type {
   Account,
   AllocationMode,
@@ -151,6 +154,20 @@ const StoreContext = createContext<StoreApi | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, loadState)
+  const [ready, setReady] = useState(() => !isDesktop())
+
+  useEffect(() => {
+    if (!isDesktop()) return
+    let cancelled = false
+    void loadDesktopState().then((loaded) => {
+      if (cancelled) return
+      dispatch({ type: 'REPLACE', state: loaded })
+      setReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const commit = useCallback(
     (next: AppState) => {
@@ -912,6 +929,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearMyData,
     ],
   )
+
+  if (!ready) {
+    return <div className="grid min-h-dvh place-items-center bg-bg text-sm text-muted">Opening your wallet…</div>
+  }
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>
 }
